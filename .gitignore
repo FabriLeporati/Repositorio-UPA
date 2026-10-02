@@ -1,0 +1,9 @@
+# Archivos que genera Java al compilar (no se suben)
+*.class
+
+# Configuracion de los editores
+.vscode/
+.idea/
+*.iml
+bin/
+out/
