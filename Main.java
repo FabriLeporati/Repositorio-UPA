@@ -98,8 +98,9 @@ public class Main {
         System.out.println("- Juegan 2 jugadores y eligen un nivel: Facil, Medio o Dificil.");
         System.out.println("- Se sortea quien empieza y se turnan: 8 preguntas en total, 4 cada uno.");
         System.out.println("- Cada acierto vale 1 punto. Si fallas, no sumas y pasa el turno.");
-        System.out.println("- Gana el que tiene mas puntos al final.");
-        System.out.println("- (Estamos pensando un desempate y una penitencia para el que pierde)");
+        System.out.println("- Si terminan empatados o con 1 punto de diferencia: MUERTE SUBITA.");
+        System.out.println("  Cada uno tiene 2 vidas. Un error quita una. Pierde el que se queda sin vidas.");
+        System.out.println("- El perdedor hace una penitencia elegida al azar.");
         System.out.println("- Se responde escribiendo el numero de la opcion (1 a 4).");
     }
 }

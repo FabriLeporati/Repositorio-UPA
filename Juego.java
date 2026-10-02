@@ -16,6 +16,7 @@ public class Juego {
     private ArrayList<Pregunta> banco;             // por ahora 30 preguntas (10 por nivel)
     private ArrayList<Pregunta> preguntasDelNivel; // solo las del nivel elegido
     private Queue<Jugador> turnos;                 // el orden de los turnos
+    private ArrayList<String> penitencias;
     private Jugador jugador1;
     private Jugador jugador2;
     private int dificultad;
@@ -32,28 +33,43 @@ public class Juego {
         this.banco = new ArrayList<>();
         this.preguntasDelNivel = new ArrayList<>();
         this.turnos = new LinkedList<>();
+        this.penitencias = new ArrayList<>();
         this.preguntaActual = 0;
         cargarPreguntas();
+        cargarPenitencias();
         buscarPreguntasDelNivel();
         mezclarPreguntas();
     }
 
     // ================= PARTIDA COMPLETA =================
 
-    // Orden de la partida: sorteo -> 8 preguntas -> marcador -> resultado
+    // Orden de la partida: sorteo -> 8 preguntas -> marcador -> (muerte subita) -> resultado
     public void jugar() {
         sortearQuienEmpieza();
         jugarPartidaNormal();
         mostrarMarcador();
 
-        System.out.println();
-        if (jugador1.getPuntaje() > jugador2.getPuntaje()) {
-            System.out.println("GANADOR: " + jugador1.getNombre());
-        } else if (jugador2.getPuntaje() > jugador1.getPuntaje()) {
-            System.out.println("GANADOR: " + jugador2.getNombre());
+        Jugador ganador;
+        Jugador perdedor;
+
+        if (estanParejos()) {
+            jugarMuerteSubita();
+            if (jugador1.getVidas() == 0) {
+                ganador = jugador2;
+                perdedor = jugador1;
+            } else {
+                ganador = jugador1;
+                perdedor = jugador2;
+            }
+        } else if (jugador1.getPuntaje() > jugador2.getPuntaje()) {
+            ganador = jugador1;
+            perdedor = jugador2;
         } else {
-            System.out.println("EMPATE! (despues vamos a hacer el desempate)");
+            ganador = jugador2;
+            perdedor = jugador1;
         }
+
+        mostrarGanador(ganador, perdedor);
     }
 
     // Se cargan los dos jugadores en la cola en orden aleatorio
@@ -88,6 +104,39 @@ public class Juego {
         }
     }
 
+    // Empatados o con 1 acierto de diferencia
+    private boolean estanParejos() {
+        int diferencia = jugador1.getPuntaje() - jugador2.getPuntaje();
+        return diferencia >= -1 && diferencia <= 1;
+    }
+
+    private void jugarMuerteSubita() {
+        System.out.println();
+        System.out.println("========== MUERTE SUBITA ==========");
+        System.out.println("Estan muy parejos! Cada uno tiene 2 vidas.");
+        System.out.println("Un error quita una vida. Pierde el primero que se quede sin vidas.");
+        jugador1.setVidas(2);
+        jugador2.setVidas(2);
+
+
+        // Sigue mientras los dos tengan vidas y queden preguntas sin usar
+        while (jugador1.getVidas() > 0 && jugador2.getVidas() > 0
+                && preguntaActual < preguntasDelNivel.size()) {
+            Jugador actual = turnos.poll();
+            Pregunta pregunta = preguntasDelNivel.get(preguntaActual);
+            preguntaActual++;
+
+            System.out.println();
+            System.out.println("--- Turno de " + actual.getNombre()
+                    + " (vidas: " + actual.getVidas() + ") ---");
+            if (!hacerPregunta(pregunta)) {
+                actual.perderVida();
+                System.out.println(actual.getNombre() + " pierde una vida. Le quedan: " + actual.getVidas());
+            }
+            turnos.offer(actual);
+        }
+    }
+
     // ================= PREGUNTAS Y RESPUESTAS =================
 
     // Devuelve true si el jugador acerto
@@ -112,17 +161,24 @@ public class Juego {
                 System.out.print("Tu respuesta (" + minimo + "-" + maximo + "): ");
                 numero = sc.nextInt();
                 sc.nextLine();
-                if (numero < minimo || numero > maximo) {
-                    System.out.println("Esa opcion no existe.");
-                } else {
-                    valido = true;
-                }
+                validarOpcion(numero, minimo, maximo);
+                valido = true;
             } catch (InputMismatchException e) {
                 System.out.println("Error: tenes que escribir un numero.");
                 sc.nextLine();
+            } catch (OpcionInvalidaException e) {
+                System.out.println(e.getMessage());
             }
         }
         return numero;
+    }
+
+    // Si la opcion esta fuera del rango, lanza nuestra excepcion propia
+    private void validarOpcion(int opcion, int minimo, int maximo) throws OpcionInvalidaException {
+        if (opcion < minimo || opcion > maximo) {
+            throw new OpcionInvalidaException("La opcion " + opcion + " no existe. Elegi entre "
+                    + minimo + " y " + maximo + ".");
+        }
     }
 
     // ================= FINAL DEL JUEGO =================
@@ -132,6 +188,22 @@ public class Juego {
         System.out.println("========== MARCADOR ==========");
         System.out.println("Puntos de " + jugador1.getNombre() + ": " + jugador1.getPuntaje());
         System.out.println("Puntos de " + jugador2.getNombre() + ": " + jugador2.getPuntaje());
+    }
+
+    private void mostrarGanador(Jugador ganador, Jugador perdedor) {
+        System.out.println();
+        System.out.println("========== RESULTADO ==========");
+        System.out.println("GANADOR: " + ganador.getNombre());
+        System.out.println("PERDEDOR: " + perdedor.getNombre());
+        System.out.println();
+        System.out.println("Penitencia para " + perdedor.getNombre() + ":");
+        System.out.println(elegirPenitencia());
+    }
+
+    // Elige una penitencia al azar de la lista
+    private String elegirPenitencia() {
+        int indice = random.nextInt(penitencias.size());
+        return penitencias.get(indice);
     }
 
     // ================= PREPARACION =================
@@ -153,6 +225,15 @@ public class Juego {
             preguntasDelNivel.set(i, preguntasDelNivel.get(j));
             preguntasDelNivel.set(j, aux);
         }
+    }
+
+    // Lista de penitencias para el perdedor
+    private void cargarPenitencias() {
+        penitencias.add("Hacer 10 flexiones de brazos.");
+        penitencias.add("Cantar el coro del himno nacional.");
+        penitencias.add("Imitar durante 10 segundos a un animal que elija el ganador.");
+        penitencias.add("Decir sin equivocarse este trabalenguas en guarani:\n"
+                + "\"Apyka puku kupépe apyta apuka puku.\"");
     }
 
     // Banco fijo de preguntas: 1 = Facil, 2 = Medio, 3 = Dificil (por ahora 10 por nivel, faltan agregar)
