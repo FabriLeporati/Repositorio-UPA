@@ -1,0 +1,19 @@
+TRIVIA: HISTORIA DEL PARAGUAY - Como ejecutarlo en Visual Studio Code
+
+1. Clonar o descomprimir la carpeta TriviaParaguay.
+2. En VS Code: Archivo > Abrir carpeta... y elegir TriviaParaguay.
+3. Tener instalada la extension "Extension Pack for Java" (de Microsoft).
+4. Abrir Main.java y tocar "Run" (arriba del metodo main) o el boton de Play.
+5. El juego se usa desde la terminal de abajo.
+
+Desde una terminal:
+   javac -encoding UTF-8 *.java
+   java Main
+
+Archivos:
+- Main.java                    -> menu principal, nombres y dificultad
+- Juego.java                   -> banco de preguntas, turnos, muerte subita, penitencias
+- Jugador.java                 -> nombre, puntaje y vidas
+- Pregunta.java                -> enunciado, opciones, respuesta correcta, dificultad
+- OpcionInvalidaException.java -> error propio del juego (opcion que no existe)
+- docs/                        -> diagrama UML, bitacoras y documento de diseno

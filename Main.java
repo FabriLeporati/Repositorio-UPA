@@ -62,9 +62,16 @@ public class Main {
         juego.jugar();
     }
 
+    // No deja seguir hasta que el nombre tenga al menos un caracter
     private static String pedirNombre(Scanner sc, int numero) {
-        System.out.print("Nombre del jugador " + numero + ": ");
-        String nombre = sc.nextLine();
+        String nombre = "";
+        while (nombre.isEmpty()) {
+            System.out.print("Nombre del jugador " + numero + ": ");
+            nombre = sc.nextLine().trim();
+            if (nombre.isEmpty()) {
+                System.out.println("El nombre no puede estar vacio.");
+            }
+        }
         return nombre;
     }
 
@@ -100,6 +107,8 @@ public class Main {
         System.out.println("- Cada acierto vale 1 punto. Si fallas, no sumas y pasa el turno.");
         System.out.println("- Si terminan empatados o con 1 punto de diferencia: MUERTE SUBITA.");
         System.out.println("  Cada uno tiene 2 vidas. Un error quita una. Pierde el que se queda sin vidas.");
+        System.out.println("- Si se acaban las preguntas en la muerte subita, los dos hacen la penitencia");
+        System.out.println("  y gana el primero en terminarla.");
         System.out.println("- El perdedor hace una penitencia elegida al azar.");
         System.out.println("- Se responde escribiendo el numero de la opcion (1 a 4).");
     }

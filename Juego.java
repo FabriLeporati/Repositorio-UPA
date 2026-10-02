@@ -7,14 +7,14 @@ import java.util.Scanner;
 
 /**
  * Clase principal de la logica: maneja la partida completa.
- * - banco: ArrayList con las preguntas del juego.
- * - preguntasDelNivel: las del nivel elegido, que se encuentran con la busqueda lineal.
+ * - banco: ArrayList con las 48 preguntas (16 por nivel).
+ * - preguntasDelNivel: las 16 que se encuentran con la busqueda lineal.
  * - turnos: Queue (cola) con el orden de los jugadores. El que juega sale
  *   de adelante (poll) y despues vuelve al final (offer).
  */
 public class Juego {
-    private ArrayList<Pregunta> banco;             // por ahora 30 preguntas (10 por nivel)
-    private ArrayList<Pregunta> preguntasDelNivel; // solo las del nivel elegido
+    private ArrayList<Pregunta> banco;             // las 48 preguntas del juego
+    private ArrayList<Pregunta> preguntasDelNivel; // solo las 16 del nivel elegido
     private Queue<Jugador> turnos;                 // el orden de los turnos
     private ArrayList<String> penitencias;
     private Jugador jugador1;
@@ -57,9 +57,12 @@ public class Juego {
             if (jugador1.getVidas() == 0) {
                 ganador = jugador2;
                 perdedor = jugador1;
-            } else {
+            } else if (jugador2.getVidas() == 0) {
                 ganador = jugador1;
                 perdedor = jugador2;
+            } else {
+                resolverEmpateFinal();
+                return;
             }
         } else if (jugador1.getPuntaje() > jugador2.getPuntaje()) {
             ganador = jugador1;
@@ -200,6 +203,25 @@ public class Juego {
         System.out.println(elegirPenitencia());
     }
 
+    // Se acabaron las preguntas en la muerte subita y nadie perdio todas sus vidas
+    private void resolverEmpateFinal() {
+        System.out.println();
+        System.out.println("========== EMPATE ==========");
+        System.out.println("Se acabaron las preguntas y nadie perdio todas sus vidas!");
+        System.out.println("Los dos tienen que hacer esta penitencia:");
+        System.out.println(elegirPenitencia());
+        System.out.println();
+        System.out.println("El primero en terminarla gana. Quien termino primero?");
+        System.out.println("1) " + jugador1.getNombre());
+        System.out.println("2) " + jugador2.getNombre());
+        int opcion = leerNumero(1, 2);
+        if (opcion == 1) {
+            System.out.println("GANADOR: " + jugador1.getNombre() + " / PERDEDOR: " + jugador2.getNombre());
+        } else {
+            System.out.println("GANADOR: " + jugador2.getNombre() + " / PERDEDOR: " + jugador1.getNombre());
+        }
+    }
+
     // Elige una penitencia al azar de la lista
     private String elegirPenitencia() {
         int indice = random.nextInt(penitencias.size());
@@ -236,7 +258,7 @@ public class Juego {
                 + "\"Apyka puku kupépe apyta apuka puku.\"");
     }
 
-    // Banco fijo de preguntas: 1 = Facil, 2 = Medio, 3 = Dificil (por ahora 10 por nivel, faltan agregar)
+    // Banco fijo de preguntas: 1 = Facil, 2 = Medio, 3 = Dificil
     private void cargarPreguntas() {
         // ---------- NIVEL FACIL ----------
         banco.add(new Pregunta("¿En qué año se independizó el Paraguay?",
@@ -261,6 +283,21 @@ public class Juego {
                 new String[]{"Ninguna", "Una", "Dos", "Cinco"}, 3, 1));
         banco.add(new Pregunta("¿De qué nacionalidad era el autor de la letra del himno paraguayo?",
                 new String[]{"Paraguayo", "Argentino", "Uruguayo", "Español"}, 3, 1));
+        banco.add(new Pregunta("¿Tiene el Paraguay salida al mar?",
+                new String[]{"Sí, al océano Atlántico", "Sí, al océano Pacífico",
+                        "No, pero tiene puertos sobre ríos", "Sí, por el río Amazonas"}, 3, 1));
+        banco.add(new Pregunta("¿Qué río divide al Paraguay en la región Oriental y el Chaco?",
+                new String[]{"Río Paraná", "Río Paraguay", "Río Pilcomayo", "Río de la Plata"}, 2, 1));
+        banco.add(new Pregunta("¿Con qué países limita el Paraguay?",
+                new String[]{"Argentina, Brasil y Bolivia", "Argentina, Chile y Bolivia",
+                        "Brasil, Uruguay y Bolivia", "Argentina, Brasil y Uruguay"}, 1, 1));
+        banco.add(new Pregunta("¿Quién gobernaba el Paraguay durante la Guerra de la Triple Alianza?",
+                new String[]{"Francisco Solano López", "Eusebio Ayala",
+                        "José Gaspar Rodríguez de Francia", "Carlos Antonio López"}, 1, 1));
+        banco.add(new Pregunta("¿Con qué apodo se conocía al Dr. José Gaspar Rodríguez de Francia?",
+                new String[]{"El Libertador", "El Mariscal", "El Supremo", "El Gran Capitán"}, 3, 1));
+        banco.add(new Pregunta("¿Qué lema tiene el escudo del reverso de la bandera?",
+                new String[]{"Orden y Progreso", "Unión y Fuerza", "Libertad o Muerte", "Paz y Justicia"}, 4, 1));
 
         // ---------- NIVEL MEDIO ----------
         banco.add(new Pregunta("¿Quién fue el comandante del ejército paraguayo en la Guerra del Chaco?",
@@ -287,9 +324,22 @@ public class Juego {
                         "José Gaspar Rodríguez de Francia", "Fulgencio Yegros"}, 2, 2));
         banco.add(new Pregunta("¿En qué año se inauguró el primer ferrocarril del Paraguay?",
                 new String[]{"1861", "1910", "1811", "1935"}, 1, 2));
+        banco.add(new Pregunta("¿En qué año ganó el Paraguay su primera Copa América?",
+                new String[]{"1979", "1953", "2011", "1930"}, 2, 2));
+        banco.add(new Pregunta("¿A qué selección le ganó el Paraguay la final de la Copa América de 1979?",
+                new String[]{"Brasil", "Argentina", "Chile", "Uruguay"}, 3, 2));
+        banco.add(new Pregunta("¿Sobre qué río está la represa de Itaipú?",
+                new String[]{"Río Paraguay", "Río Pilcomayo", "Río Uruguay", "Río Paraná"}, 4, 2));
+        banco.add(new Pregunta("¿En qué año se adoptó la bandera paraguaya con sus dos escudos?",
+                new String[]{"1811", "1842", "1870", "1992"}, 2, 2));
+        banco.add(new Pregunta("¿Qué título tuvo el Dr. Francia desde 1816 hasta su muerte?",
+                new String[]{"Presidente constitucional", "Mariscal", "Cónsul", "Dictador Perpetuo"}, 4, 2));
+        banco.add(new Pregunta("¿Quién encabezó la toma del cuartel la noche del 14 de mayo de 1811?",
+                new String[]{"Pedro Juan Caballero", "Fulgencio Yegros",
+                        "José Gaspar Rodríguez de Francia", "Carlos Antonio López"}, 1, 2));
 
         // ---------- NIVEL DIFICIL ----------
-        banco.add(new Pregunta("¿Cuál fue la primera batalla de la Guerra del Chaco, en 1932?",
+        banco.add(new Pregunta("¿Cuál fue la primera gran batalla de la Guerra del Chaco, en 1932?",
                 new String[]{"Nanawa", "Boquerón", "Tuyutí", "Cerro Corá"}, 2, 3));
         banco.add(new Pregunta("¿Cuál fue la mayor victoria paraguaya en la Guerra de la Triple Alianza, en 1866?",
                 new String[]{"Cerro Corá", "Acosta Ñu", "Boquerón", "Curupayty"}, 4, 3));
@@ -305,12 +355,24 @@ public class Juego {
         banco.add(new Pregunta("¿Qué presidente creó el guaraní como moneda, en 1943?",
                 new String[]{"Higinio Morínigo", "Eusebio Ayala",
                         "Alfredo Stroessner", "Carlos Antonio López"}, 1, 3));
-        banco.add(new Pregunta("¿En qué año empezó Itaipú a producir energía de forma comercial?",
-                new String[]{"1973", "1985", "1999", "2005"}, 2, 3));
+        banco.add(new Pregunta("¿En qué año empezó Itaipú a generar energía?",
+                new String[]{"1973", "1984", "1999", "2005"}, 2, 3));
         banco.add(new Pregunta("¿Qué tenía de único en América el ferrocarril paraguayo de 1861?",
                 new String[]{"Era subterráneo", "Era eléctrico",
                         "Se hizo solo con capital del Estado", "Llegaba hasta el océano"}, 3, 3));
         banco.add(new Pregunta("¿Qué representa el color blanco de la bandera paraguaya?",
                 new String[]{"La paz", "La justicia", "La libertad", "La religión"}, 1, 3));
+        banco.add(new Pregunta("¿Cuál era el apodo en guaraní del Dr. José Gaspar Rodríguez de Francia?",
+                new String[]{"Mburuvicha", "Karai Guasu", "Tupã", "Ñandejára"}, 2, 3));
+        banco.add(new Pregunta("¿En qué país se jugó la Copa América de 1953 que ganó el Paraguay?",
+                new String[]{"Paraguay", "Brasil", "Perú", "Argentina"}, 3, 3));
+        banco.add(new Pregunta("¿Con qué cargo gobernó Carlos Antonio López desde 1841, antes de ser presidente?",
+                new String[]{"Dictador", "Cónsul", "Rey", "Virrey"}, 2, 3));
+        banco.add(new Pregunta("¿En qué año asumió Francisco Solano López la presidencia?",
+                new String[]{"1844", "1870", "1862", "1811"}, 3, 3));
+        banco.add(new Pregunta("¿Desde qué año se celebra en el Paraguay el Día de la Madre el 15 de mayo?",
+                new String[]{"1811", "1924", "1992", "1870"}, 2, 3));
+        banco.add(new Pregunta("¿En qué año se escribió la letra del himno nacional paraguayo?",
+                new String[]{"1846", "1811", "1870", "1935"}, 1, 3));
     }
 }
